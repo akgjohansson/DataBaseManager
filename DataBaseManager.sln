@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseManager", "DataBaseManager\DataBaseManager.csproj", "{1CA841AE-87F1-4AF3-8B70-DAA4295F09DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1CA841AE-87F1-4AF3-8B70-DAA4295F09DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CA841AE-87F1-4AF3-8B70-DAA4295F09DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CA841AE-87F1-4AF3-8B70-DAA4295F09DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CA841AE-87F1-4AF3-8B70-DAA4295F09DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
