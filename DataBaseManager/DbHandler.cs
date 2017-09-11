@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace DataBaseManager
         /// <param name="tableName"></param>
         /// <param name="columns"></param>
         /// <returns>True if success, false if not (without any effect on database)</returns>
-        public bool CreateTable(string parent , string tableName , string[] columns , string[] datatypes)
+        public bool CreateTable(string parent , string tableName , string[] columns , SqlDbType[] datatypes)
         {
             if (columns.Length != datatypes.Length)
             {
@@ -161,7 +162,7 @@ namespace DataBaseManager
 
         public void AddEntry()
         {
-
+            
         }
 
         public void ManageEntries()
