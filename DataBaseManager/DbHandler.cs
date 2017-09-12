@@ -13,6 +13,7 @@ namespace DataBaseManager
     public class DbHandler
     {
         string Constr { get; set; }
+
         public DbHandler(string _Constr)
         {
             Constr = _Constr;
@@ -25,7 +26,29 @@ namespace DataBaseManager
         /// <param name="tableName"></param>
         /// <param name="columns"></param>
         /// <returns>True if success, false if not (without any effect on database)</returns>
-        public bool CreateTable(string parent , string tableName , string[] columns , SqlDbType[] datatypes)
+        public bool CreateTable(string parent, string tableName, string[] columns, SqlDbType[] dataType , string[] additionalColumnsOptions)
+        {
+            return CreateTableMethod(parent, tableName, columns, dataType, additionalColumnsOptions);
+        }
+        /// <summary>
+        /// Creates a new table in the database. N.B. do not include key columns in argument list!
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="tableName"></param>
+        /// <param name="columns"></param>
+        /// <returns>True if success, false if not (without any effect on database)</returns>
+        public bool CreateTable(string parent , string tableName , string[] columns , SqlDbType[] dataType)
+        {
+            string[] additionalOptions = new string[dataType.Length];
+            for (int i = 0; i < dataType.Length; i++)
+            {
+                additionalOptions[i] = "not null";
+            }
+            return CreateTableMethod(parent, tableName, columns, dataType , new string[dataType.Length]);
+        }
+
+        
+        private bool CreateTableMethod(string parent , string tableName , string[] columns , SqlDbType[] datatypes , string[] additionalColumnOptions)
         {
             if (columns.Length != datatypes.Length)
             {
@@ -39,10 +62,10 @@ namespace DataBaseManager
             }
 
             string foreignKey = $"FK_{parent}_{tableName}";
-            string columnsText = $"Id int not null identity primary key, {parent}Id int";
+            string columnsText = $"Id int not null identity primary key, {parent}Id int not null";
             for (int i = 0; i < columns.Length; i++)
             {
-                columnsText += $",{columns[i]} {datatypes[i]}";
+                columnsText += $",{columns[i]} {datatypes[i]} {additionalColumnOptions[i]}";
             }
             
 
@@ -230,6 +253,20 @@ namespace DataBaseManager
             return printedCategories;
         }
 
+        public bool CreateForeignKeyConstraint(string parent , string child)
+        {
+            if (IsTableExisting(parent) && IsTableExisting(child))
+            {
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+
         private void ListTreeStructureMethod(string parent , List<List<string>> treeList, List<string> ancestorTableTree)
         {
             string[] children = FindForeignTables(parent);
@@ -255,7 +292,33 @@ namespace DataBaseManager
             }
         }
 
-
+        public string[] ListColumnsFromTable(string table)
+        {
+            if (this.IsTableExisting(table))
+            {
+                List<string> output = new List<string>();
+                using (SqlConnection con = new SqlConnection(Constr)) {
+                    con.Open();
+                    int objectId = GetObjectId(con,table);
+                    string command = $"select name from sys.all_columns where sys.all_columns.object_id = {objectId}";
+                    using (SqlCommand com = new SqlCommand(command, con))
+                    {
+                        SqlDataReader reader = com.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            output.Add(reader.GetString(0));
+                        }
+                        reader.Close();
+                    }
+                    
+                }
+                return output.ToArray();
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Finds all children of a table
