@@ -46,17 +46,26 @@ namespace DataBaseManager
             }
             
 
-            string command = $"create table {tableName} ({columnsText},constraint {foreignKey} foreign key ({parent}Id) references {parent}({parent}Id))";
+            string command = $"create table {tableName} ({columnsText},constraint {foreignKey} foreign key ({parent}Id) references {parent}(Id))";
             using (SqlConnection con = new SqlConnection(Constr))
             using (SqlCommand com = new SqlCommand(command, con))
             {
+                con.Open();
                 com.ExecuteNonQuery();
             }
             return true;
 
         }
 
-        
+        public void CreateProduct()
+        {
+
+        }
+
+        public void RemoveProduct()
+        {
+
+        }
 
         public void ResetDatabase(string filePath)
         {
@@ -77,6 +86,10 @@ namespace DataBaseManager
                     RemoveRecursively(table);
                 }
             }
+            else
+            {
+                DeleteThisTable(table);
+            }
         }
 
         private void RemoveRecursively(string table)
@@ -89,16 +102,17 @@ namespace DataBaseManager
             }
         }
 
-        private void DeleteThisTable(string child)
+        private void DeleteThisTable(string table)
         {
             using (SqlConnection con = new SqlConnection(Constr))
             {
-                string[] foreignKeys = GetForeignKeys(child, con);
+                con.Open();
+                string[] foreignKeys = GetForeignKeys(table, con);
                 if (foreignKeys.Length != 0)
                 {
                     foreach (string key in foreignKeys)
                     {
-                        string command = $"alter table {child} drop constraint {key};";
+                        string command = $"alter table {table} drop constraint {key};";
 
                         using (SqlCommand com = new SqlCommand(command, con))
                         {
@@ -107,7 +121,7 @@ namespace DataBaseManager
                     }
                 }
 
-                using (SqlCommand com = new SqlCommand("drop table {child}"))
+                using (SqlCommand com = new SqlCommand($"drop table {table}" , con))
                 {
                     com.ExecuteNonQuery();
                 }
@@ -117,17 +131,17 @@ namespace DataBaseManager
         /// <summary>
         /// Gets the foreign key(s) from a table and returns them as a string array. If table doesn not exist, an empty array is returned
         /// </summary>
-        /// <param name="child"></param>
+        /// <param name="table"></param>
         /// <param name="con"></param>
         /// <returns></returns>
-        private string[] GetForeignKeys(string child, SqlConnection con)
+        private string[] GetForeignKeys(string table, SqlConnection con)
         {
             List<string> output = new List<string>();
-            if (IsTableExisting(child))
+            if (IsTableExisting(table))
             {
                 string command = $"select sys.foreign_keys.name from sys.foreign_keys" +
-                    $"inner join sys.tables on sys.foreign_keys.referenced_object_id = sys.tables.object_id" +
-                    $"where tables.name = '{child}'; ";
+                    $" inner join sys.tables on sys.foreign_keys.referenced_object_id = sys.tables.object_id" +
+                    $" where tables.name = '{table}'; ";
                 using (SqlCommand com = new SqlCommand(command, con))
                 {
                     SqlDataReader reader = com.ExecuteReader();
@@ -177,9 +191,9 @@ namespace DataBaseManager
         {
             List<List<string>> output = new List<List<string>>
             {
-                [0] = new List<string>()
+                new List<string>{"Products"}
             };
-            ListTreeStructureMethod("Products" , output);
+            ListTreeStructureMethod(output[0][0],output);
             return output;
         }
 
@@ -191,10 +205,29 @@ namespace DataBaseManager
         {
             List<List<string>> output = new List<List<string>>
             {
-                [0] = new List<string>()
+                new List<string>{parent}
             };
             ListTreeStructureMethod(parent , output);
             return output;
+        }
+
+        public List<string> ListAllTables()
+        {
+            List<string> printedCategories = new List<string>();
+            List<List<string>> categories = this.ListTreeStructure();
+
+            foreach (List<string> category in categories)
+            {
+                foreach (string item in category)
+                {
+                    if (!printedCategories.Contains(item))
+                    {
+                        printedCategories.Add(item);
+                    }
+                }
+
+            }
+            return printedCategories;
         }
 
         private void ListTreeStructureMethod(string parent , List<List<string>> treeList)
@@ -211,6 +244,8 @@ namespace DataBaseManager
             }
         }
 
+
+
         /// <summary>
         /// Finds all children of a table
         /// </summary>
@@ -221,10 +256,11 @@ namespace DataBaseManager
             List<string> children = new List<string>();
 
             using (SqlConnection con = new SqlConnection(Constr)) {
+                con.Open();
                 int objectId = GetObjectId(con, table);
                 string command = $"select sys.tables.name from sys.foreign_keys " +
-                    $"inner join sys.tables on sys.tables.object_id = sys.foreign_keys.referenced_object_id" +
-                    $"where sys.foreign_keys.parent_object_id = {objectId}";
+                    $"inner join sys.tables on sys.tables.object_id = sys.foreign_keys.parent_object_id" +
+                    $" where sys.foreign_keys.referenced_object_id = {objectId}";
                 using (SqlCommand com = new SqlCommand(command, con))
                 {
                     SqlDataReader reader = com.ExecuteReader();
@@ -251,6 +287,7 @@ namespace DataBaseManager
         {
             using (SqlConnection connection = new SqlConnection(Constr))
             {
+                connection.Open();
                 int objectId = GetObjectId(connection, table);
                 string command = $"select sys.tables.name from sys.tables " +
                     $"inner join sys.foreign_keys on sys.tables.object_id = sys.foreign_keys.parent_object_id " +
@@ -284,6 +321,7 @@ namespace DataBaseManager
             using (SqlConnection con = new SqlConnection(Constr))
             using (SqlCommand com = new SqlCommand(command, con))
             {
+                con.Open();
                 SqlDataReader reader = com.ExecuteReader();
                 while (reader.Read())
                 {
