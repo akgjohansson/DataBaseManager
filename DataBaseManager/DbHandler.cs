@@ -72,7 +72,7 @@ namespace DataBaseManager
 
         }
 
-        public void RemoveTable(string table)
+        public void RemoveTable(string table , bool deleteThisTableToo)
         {
             string[] children = FindForeignTables(table);
             if (children.Length != 0)
@@ -81,12 +81,12 @@ namespace DataBaseManager
                 
                 Console.WriteLine();
                 children.ToList().ForEach(x => PrintTree(x));
-                if (GetInputFromUser.GetString("Proceed? (y/[n]): ").ToLower() == "y")
+                if (GetInputFromUser.GetString("Proceed? ('proceed'/[n]): ").ToLower() == "proceed")
                 {
                     RemoveRecursively(table);
                 }
             }
-            else
+            else if (deleteThisTableToo)
             {
                 DeleteThisTable(table);
             }
@@ -193,7 +193,7 @@ namespace DataBaseManager
             {
                 new List<string>{"Products"}
             };
-            ListTreeStructureMethod(output[0][0],output);
+            ListTreeStructureMethod(output[0][0],output, new List<string> { "Products" });
             return output;
         }
 
@@ -207,7 +207,7 @@ namespace DataBaseManager
             {
                 new List<string>{parent}
             };
-            ListTreeStructureMethod(parent , output);
+            ListTreeStructureMethod(parent , output , new List<string> { parent });
             return output;
         }
 
@@ -230,17 +230,28 @@ namespace DataBaseManager
             return printedCategories;
         }
 
-        private void ListTreeStructureMethod(string parent , List<List<string>> treeList)
+        private void ListTreeStructureMethod(string parent , List<List<string>> treeList, List<string> ancestorTableTree)
         {
             string[] children = FindForeignTables(parent);
             foreach (string tableName in children)
             {
-                int lastRow = treeList.Count-1;
-                treeList[lastRow].Add(tableName);
-                ListTreeStructureMethod(tableName, treeList);
+                
+                
+                List<string> thisChildsAncestors = new List<string>();
+                ancestorTableTree.ForEach(x => thisChildsAncestors.Add(x));
+                thisChildsAncestors.Add(tableName);
+                ListTreeStructureMethod(tableName, treeList , thisChildsAncestors);
+                
 
-                if (treeList[lastRow].Count != 0)
-                    treeList.Add(new List<string>());
+                
+            }
+            if (children.Length == 0)
+            {
+                treeList.Add(new List<string>());
+                int lastRow = treeList.Count - 1;
+                ancestorTableTree.ForEach(x => treeList[lastRow].Add(x));
+                //treeList[lastRow].Add(parent);
+                
             }
         }
 
@@ -315,9 +326,9 @@ namespace DataBaseManager
         /// </summary>
         /// <param name="table"></param>
         /// <returns></returns>
-        private bool IsTableExisting(string table)
+        public bool IsTableExisting(string table)
         {
-            string command = $"select * from sys.tables";
+            string command = $"select name from sys.tables";
             using (SqlConnection con = new SqlConnection(Constr))
             using (SqlCommand com = new SqlCommand(command, con))
             {
