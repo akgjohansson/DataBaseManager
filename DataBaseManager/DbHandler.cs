@@ -137,7 +137,7 @@ namespace DataBaseManager
                     RemoveRecursively(table);
                 }
             }
-            else if (deleteThisTableToo)
+            if (deleteThisTableToo)
             {
                 DeleteThisTable(table);
             }
