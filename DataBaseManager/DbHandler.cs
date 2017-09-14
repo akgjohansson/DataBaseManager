@@ -30,6 +30,7 @@ namespace DataBaseManager
         {
             return CreateTableMethod(parent, tableName, columns, dataType, additionalColumnsOptions);
         }
+
         /// <summary>
         /// Creates a new table in the database. N.B. do not include key columns in argument list!
         /// </summary>
@@ -80,9 +81,36 @@ namespace DataBaseManager
 
         }
 
-        public void CreateProduct()
+        
+        public List<List<string>> GetAllRowsFromTable(string table)
         {
-
+            using (SqlConnection con = new SqlConnection(Constr))
+            {
+                con.Open();
+                if (this.IsTableExisting(table , con))
+                {
+                    List<List<string>> output = new List<List<string>>();
+                    string command = $"select * from {table}";
+                    using (SqlCommand com = new SqlCommand(command, con))
+                    {
+                        SqlDataReader reader = com.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            output.Add(new List<string>());
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                output[output.Count - 1].Add(reader.GetString(i));
+                            }
+                        }
+                        reader.Close();
+                    }
+                    return output;
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
 
         public void RemoveProduct()
@@ -197,9 +225,21 @@ namespace DataBaseManager
             }
         }
 
-        public void AddEntry()
+        public void AddEntry(string table , string[] values)
         {
-            
+            List<string> inputValues = values.ToList();
+            string valuesString = "";
+            inputValues.ForEach(x => valuesString += $",{x}");
+            valuesString = valuesString.Substring(1);
+            using (SqlConnection con = new SqlConnection(Constr))
+            {
+                con.Open();
+                string command = $"insert into {table} values ({valuesString});";
+                using (SqlCommand com = new SqlCommand(command, con))
+                {
+                    com.ExecuteNonQuery();
+                }
+            }
         }
 
         public void ManageEntries()
@@ -391,8 +431,16 @@ namespace DataBaseManager
         /// <returns></returns>
         public bool IsTableExisting(string table)
         {
-            string command = $"select name from sys.tables";
             using (SqlConnection con = new SqlConnection(Constr))
+            {
+                return IsTableExisting(table, con);
+            }
+            
+        }
+
+        internal bool IsTableExisting(string table, SqlConnection con)
+        {
+            string command = $"select name from sys.tables";
             using (SqlCommand com = new SqlCommand(command, con))
             {
                 con.Open();
