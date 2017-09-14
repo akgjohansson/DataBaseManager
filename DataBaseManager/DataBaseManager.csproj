@@ -51,6 +51,8 @@
     <Compile Include="AutoMapper.cs" />
     <Compile Include="DataBaseHelpers.cs" />
     <Compile Include="DbHandler.cs" />
+    <Compile Include="ITable.cs" />
+    <Compile Include="MappingFileManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -59,10 +61,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\nHibernateStart\NHibernateStart.csproj">
+      <Project>{2bc5dcc0-58d6-4a02-a499-847241ecfdc5}</Project>
+      <Name>NHibernateStart</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\UserInput\UserInput\UserInput\UserInput.csproj">
       <Project>{6a0318cc-4091-4f5a-b5d9-d6c5724e1ff5}</Project>
       <Name>UserInput</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MappingFileBuilders\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
