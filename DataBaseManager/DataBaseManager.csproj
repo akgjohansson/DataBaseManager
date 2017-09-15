@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -49,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoMapper.cs" />
+    <Compile Include="ClassFileManager.cs" />
     <Compile Include="DataBaseHelpers.cs" />
     <Compile Include="DbHandler.cs" />
     <Compile Include="ITable.cs" />
@@ -77,7 +77,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="MappingFileBuilders\beginningOfFile.txt" />
+    <Content Include="ClassFileBuilders\beginningOfFile.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

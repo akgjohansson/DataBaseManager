@@ -13,9 +13,9 @@ namespace DataBaseManager
     {
         private string BeginningOfFile { get; set; }
         private string EndOfFile { get; set; }
-        private string FullPathToHere { get; set; }
+        public string FullPathToHere { get; set; }
         private string FullPathToMFB { get; set; }
-        private MapperTextParts mapperText { get; set; }
+        private MapperTextParts MapperText { get; set; }
 
         public MappingFileManager()
         {
@@ -23,41 +23,46 @@ namespace DataBaseManager
             FullPathToMFB = FullPathToHere + "\\MappingFileBuilders";
             BeginningOfFile = System.IO.File.ReadAllText($"{FullPathToHere}\\MappingFileBuilders\\beginningOfFile.txt");
             EndOfFile = $"    }}{Environment.NewLine}}};";
-            mapperText = new MapperTextParts();
+            MapperText = new MapperTextParts();
         }
 
-        public void NewTable(string tableName, string[] properties)
+        public void NewTables(string tableName, string[] properties , Type[] types)
         {
             string firstPart = "";
-            firstPart += mapperText.BeginningOfMapper(tableName);
-            firstPart += mapperText.Id(tableName);
-            firstPart += mapperText.Properties(properties);
+            firstPart += MapperText.BeginningOfMapper(tableName);
+            firstPart += MapperText.Id(tableName);
+            firstPart += MapperText.Properties(properties);
 
             string secondPart = "";
-            secondPart += mapperText.EndOfMapper;
+            secondPart += MapperText.EndOfMapper;
             SaveBothParts(firstPart, secondPart, tableName);
+            ClassFileManager cfm = new ClassFileManager(FullPathToHere);
+            cfm.CreateClass(tableName, properties , types);
+            cfm.Make();
         }
 
+        
 
         public void AddOneToMany(string tableName , string foreignTableName)
         {
             string secondPart1 = GetSecondPart(tableName);
-            secondPart1 = mapperText.OneToMany(tableName, foreignTableName) + secondPart1;
+            secondPart1 = MapperText.OneToMany(tableName, foreignTableName) + secondPart1;
 
             SaveSecondPart(secondPart1 , tableName);
 
             string secondPart2 = GetSecondPart(foreignTableName);
-            secondPart2 = mapperText.ManyToOne(tableName, foreignTableName) + secondPart2;
+            secondPart2 = MapperText.ManyToOne(tableName, foreignTableName) + secondPart2;
             SaveSecondPart(secondPart2, foreignTableName);
         }
+
         public void AddManyToMany(string tableName , string foreignTableName)
         {
             string secondPart1 = GetSecondPart(tableName);
-            secondPart1 = mapperText.ManyToMany(tableName, foreignTableName, true) +  secondPart1;
+            secondPart1 = MapperText.ManyToMany(tableName, foreignTableName, true) +  secondPart1;
             SaveSecondPart(secondPart1, tableName);
 
             string secondPart2 = GetSecondPart(foreignTableName);
-            secondPart2 = mapperText.ManyToMany(tableName, foreignTableName, false) + secondPart2;
+            secondPart2 = MapperText.ManyToMany(tableName, foreignTableName, false) + secondPart2;
             SaveSecondPart(secondPart2, foreignTableName);
         }
 
@@ -103,28 +108,40 @@ namespace DataBaseManager
             }
         }
 
-
         /// <summary>
         ///  Removes all tables
         /// </summary>
         public void TabulaRasa()
         {
-            string[] files = GetAllTables();
-            string[] tableNames = new string[files.Length];
-            for (int i = 0; i < files.Length; i++)
+            string[] fileNames = Validator.Selections.ReturnMatches(Directory.GetFiles(FullPathToMFB),"^table+",true);
+            foreach (string file in fileNames)
             {
-                tableNames[i] = files[i].Substring(6, files[i].Length - 3);
+                File.Delete(file);
             }
+            Build();
+            Make();
+        }
+        /// <summary>
+        /// Builds the database
+        /// </summary>
+        private void Make()
+        {
+            
         }
 
         public string[] GetAllTables()
         {
-            string[] allFiles = System.IO.Directory.GetFiles(FullPathToHere);
-            string[] files = Validator.Selections.ReturnMatches(allFiles, "^tables*", false);
+            string[] allFiles = System.IO.Directory.GetFiles(FullPathToMFB);
+            for (int i = 0; i < allFiles.Length; i++)
+            {
+                string[] splitFilePath = allFiles[i].Split('\\');
+                allFiles[i] = splitFilePath[splitFilePath.Length - 1];
+            }
+            string[] files = Validator.Selections.ReturnMatches(allFiles, "^table+", false);
             string[] tables = new string[files.Length];
             for (int i = 0; i < files.Length; i++)
             {
-                tables[i] = files[i].Split('.')[0];
+                tables[i] = files[i].Split('.')[0].Substring(5);
             }
             return Validator.Selections.RemoveDuplicates(tables);
         }
@@ -132,21 +149,20 @@ namespace DataBaseManager
         /// <summary>
         /// Builds the Mapping file
         /// </summary>
-        internal void Build()
+        public void Build()
         {
-
+            string[] tables = GetAllTables();
+            string output = "";
+            output += BeginningOfFile;
+            foreach (string table in tables)
+            {
+                output += GetFirstPart(table);
+                output += GetSecondPart(table);
+            }
+            File.WriteAllText($"{FullPathToMFB}\\mappings.cs",output);
         }
 
-        /// <summary>
-        /// Adds newly created class file to project (in the .csproj file)
-        /// </summary>
-        /// <param name="fileName"></param>
-        internal void AddFileToProject(string fileName)
-        {
-            string pathToCsprojFile = "DataBaseManager\\DataBaseManager.csproj";
-
-        }
-
+        
 
         private static string GetPathToHomeDir()
         {

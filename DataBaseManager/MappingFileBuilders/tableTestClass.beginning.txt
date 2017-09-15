@@ -1,0 +1,4 @@
+            _modelMapper.Class<TestClass>(e =>            {
+                e.Id(p => p.TestClassId, p => p.Generator(Generators.GuidComb));
+                e.Property(p => p.Name);
+                e.Property(p => p.Age);

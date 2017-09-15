@@ -1,2 +1,7 @@
+                e.Set(p => p.Utländsk, p =>
+                {
+                    p.Inverse(true);
+                    p.Cascade(Cascade.All);
+                    p.Key(k => k.Column(col => col.Name("TabellId")));
+                }, p => p.OneToMany());
             });
-        }

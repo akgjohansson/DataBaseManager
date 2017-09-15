@@ -1,2 +1,6 @@
-            });
-        }
+                e.ManyToOne(p => p.Utländsk, mapper =>
+               {
+                   mapper.Column("UtländskId");
+                   mapper.NotNullable(true);
+                   mapper.Cascade(Cascade.None);
+               });            });
