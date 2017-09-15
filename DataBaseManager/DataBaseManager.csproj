@@ -52,6 +52,7 @@
     <Compile Include="DataBaseHelpers.cs" />
     <Compile Include="DbHandler.cs" />
     <Compile Include="ITable.cs" />
+    <Compile Include="MapperTextParts.cs" />
     <Compile Include="MappingFileManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,9 +70,14 @@
       <Project>{6a0318cc-4091-4f5a-b5d9-d6c5724e1ff5}</Project>
       <Name>UserInput</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Validator\Validator\Validator.csproj">
+      <Project>{307af482-0723-46f6-9f3e-cbdef636fe42}</Project>
+      <Name>Validator</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="MappingFileBuilders\" />
+    <Content Include="MappingFileBuilders\beginningOfFile.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

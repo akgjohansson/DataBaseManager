@@ -1,0 +1,4 @@
+            _modelMapper.Class<Tabell>(e =>            {
+                e.Id(p => p.TabellId, p => p.Generator(Generators.GuidComb));
+                e.Property(p => p.Name);
+                e.Property(p => p.Age);

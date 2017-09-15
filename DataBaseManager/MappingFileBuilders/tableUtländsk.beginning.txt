@@ -1,0 +1,4 @@
+            _modelMapper.Class<Utländsk>(e =>            {
+                e.Id(p => p.UtländskId, p => p.Generator(Generators.GuidComb));
+                e.Property(p => p.Name);
+                e.Property(p => p.Age);
